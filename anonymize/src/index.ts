@@ -1,16 +1,23 @@
 import {dataToAnonymize} from './data/data-to-anonymize';
 import {blackListElements} from './data/blacklist';
 
-var AnonymizedPersonNames:string[] =["Hubert Dupont", "Sandrine Martin", "Jean Le Hénaff" ];
+var AnonymizedPersonNames:string[] =["Hubert Dupont", "Sandrine Martin","Jean Le Hénaff" ];
 var AnonymizedPersonEmails:string[]=["hubert.dupont@gmail.com", "sandrine.martin54@yahoo.com", "jean.le.henaff@imagine.fr"];
 var AnonymizedCompanyNames:string[]=["Monoprix","Paul","Imagine"];
 
-var correspondance = new Map([["Elon Musk","Jean Le Hénaff"],["Zizou","Jon"]])
+
+
+var anonymizedAttributes:string []=[...AnonymizedPersonNames, ...AnonymizedPersonEmails,...AnonymizedCompanyNames]
+
+var correspondance = new Map()
+for (var i=0; i< anonymizedAttributes.length;i++){
+    correspondance.set(blackListElements[i],anonymizedAttributes[i])
+}
+console.log(correspondance)
 
 var data_string:string = JSON.stringify(dataToAnonymize);
 
-console.log(data_string);
-
+console.log(dataToAnonymize);
 
 for (var black_listed of blackListElements)
 {
@@ -18,4 +25,6 @@ for (var black_listed of blackListElements)
     data_string  = data_string.replace(reg,correspondance.get(black_listed)!);
 }
 
-console.log(JSON.parse(data_string));
+var anonymizedData=JSON.parse(data_string);
+
+console.log(anonymizedData);

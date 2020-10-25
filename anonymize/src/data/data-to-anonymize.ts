@@ -27,4 +27,9 @@ interface Message {
     sub_messages?: SubMessage[];
 }
 
-export const dataToAnonymize: Message[] = [ {id:"cc", requester:{id:"yo",name:"Elon Musk",email:"elon Musk"},submitter:{id:"yo",name:"Zizou",email:"popo"} }];
+
+
+let M1:Message = {id:"msg1", requester:{id:"req1",name:"Elon Musk",email:"elon.musk@tesla.com"},submitter:{id:"submit1",name:"jean dujardin",email:"jean.dujardin@oss.fr"} }
+let M2:Message = {id:"msg2", requester:{id:"req2",name:"Steve Jobs",email:"steve.jobs@rip.com"},submitter:{id:"submit2",name:"jean dujardin",email:"jean.dujardin@oss.fr"} }
+
+export const dataToAnonymize: Message[] = [M1,M2];
