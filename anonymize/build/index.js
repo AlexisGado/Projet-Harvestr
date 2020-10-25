@@ -10,7 +10,7 @@ var data_string = JSON.stringify(data_to_anonymize_1.dataToAnonymize);
 console.log(data_string);
 for (var _i = 0, blackListElements_1 = blacklist_1.blackListElements; _i < blackListElements_1.length; _i++) {
     var black_listed = blackListElements_1[_i];
-    var reg = new RegExp(black_listed);
+    var reg = new RegExp(black_listed, 'gi');
     data_string = data_string.replace(reg, correspondance.get(black_listed));
 }
 console.log(JSON.parse(data_string));
