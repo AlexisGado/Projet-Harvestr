@@ -1,7 +1,27 @@
 import {dataToAnonymize} from './data/data-to-anonymize';
 import {blackListElements} from './data/blacklist';
+import { PRIORITY_BELOW_NORMAL } from 'constants';
 
-var AnonymizedPersonNames:string[] =["Hubert Dupont", "Sandrine Martin","Jean Le Hénaff" ];
+
+const fs = require("fs");
+const csv = require("csv-parser");
+const path = require('path');
+var results:any[] = [];
+
+const myPath = path.join(__dirname,'../noms.csv')
+
+fs.createReadStream(myPath).pipe(csv()).on('data', (data:string) => results.push(data));
+
+
+var AnonymizedPersonNames:string[] =[];
+
+for (var objet of results)
+{
+    AnonymizedPersonNames.push(objet.Nom);
+}
+console.log(results);
+console.log(AnonymizedPersonNames);
+
 var AnonymizedPersonEmails:string[]=["hubert.dupont@gmail.com", "sandrine.martin54@yahoo.com", "jean.le.henaff@imagine.fr"];
 var AnonymizedCompanyNames:string[]=["Monoprix","Paul","Imagine"];
 
