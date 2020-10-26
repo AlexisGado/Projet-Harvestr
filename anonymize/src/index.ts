@@ -6,12 +6,31 @@ var AnonymizedPersonEmails:string[]=["hubert.dupont@gmail.com", "sandrine.martin
 var AnonymizedCompanyNames:string[]=["Monoprix","Paul","Imagine"];
 
 
-
 var anonymizedAttributes:string []=[...AnonymizedPersonNames, ...AnonymizedPersonEmails,...AnonymizedCompanyNames]
 
+
 var correspondance = new Map()
-for (var i=0; i< anonymizedAttributes.length;i++){
-    correspondance.set(blackListElements[i],anonymizedAttributes[i])
+for (var black_listed of blackListElements){
+
+    if (correspondance.get(black_listed) == null){
+        if (black_listed.includes("@")){
+            var rd = Math.floor(Math.random() * AnonymizedPersonEmails.length);
+            correspondance.set(black_listed,AnonymizedPersonEmails[rd])
+            AnonymizedPersonEmails.splice(rd,1);
+        }
+        else{ 
+            if (black_listed.includes(" ")){
+                var rd = Math.floor(Math.random() * AnonymizedPersonNames.length);
+                correspondance.set(black_listed,AnonymizedPersonNames[rd])
+                AnonymizedPersonNames.splice(rd,1);
+            }
+            else{
+                var rd = Math.floor(Math.random() * AnonymizedCompanyNames.length);
+                correspondance.set(black_listed,AnonymizedCompanyNames[rd])
+                AnonymizedCompanyNames.splice(rd,1);
+            }
+        }
+    }
 }
 console.log(correspondance)
 
