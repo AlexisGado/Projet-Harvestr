@@ -31,5 +31,6 @@ interface Message {
 
 let M1:Message = {id:"msg1", requester:{id:"req1",name:"Elon Musk",email:"elon.musk@tesla.com"},submitter:{id:"submit1",name:"jean dujardin",email:"jean.dujardin@oss.fr"} }
 let M2:Message = {id:"msg2", requester:{id:"req2",name:"Steve Jobs",email:"steve.jobs@rip.com"},submitter:{id:"submit2",name:"jean dujardin",email:"jean.dujardin@oss.fr"} }
+let M3:Message = {id:"msg3", requester:{id:"req3",name:"Didier Raoult",email:"didier.raoult@latimone.fr"},submitter:{id:"submit3",name:"manu macron",email:"emmanuel.macron@elysee.fr"} }
 
-export const dataToAnonymize: Message[] = [M1,M2];
+export const dataToAnonymize: Message[] = [M1,M2,M3];
