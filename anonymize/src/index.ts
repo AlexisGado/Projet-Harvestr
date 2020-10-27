@@ -1,18 +1,19 @@
 import {dataToAnonymize} from './data/data-to-anonymize';
 import {blacklistPersonNames, blacklistPersonEmails, blacklistCompanyNames} from './data/blacklist';
 import { PRIORITY_BELOW_NORMAL } from 'constants';
+import csvParser from 'csv-parser';
 
 //Open files .csv containing our data (Name, emails Company Name,  )
 const fs = require("fs");
 const csv = require("csv-parser");
 const path = require('path');
-var dictionnary:any[] = [];
+var AnononymNamesEmails:any[]= [];
 
 const myPath = path.join(__dirname,'../noms.csv')
-const csvStream = fs.createReadStream(myPath).pipe(csv());
-
-csvStream.on('data', (data:string) =>{ 
-    dictionnary.push(data);
+const csvStream = fs.createReadStream(myPath).pipe(csvParser());
+csvStream.on('data', (data:string)=> {
+    AnononymNamesEmails.push(data);
+    // use row data
 });
 
 csvStream.on('end', () => {
@@ -20,14 +21,22 @@ csvStream.on('end', () => {
   });
 
 const onDataReadFinished=()=>{
-    var AnonymizedPersonNames:string[] =[];
+    console.log(AnononymNamesEmails)
+    var AnonymizedPersonNames:string[]=[]
+    var AnonymizedPersonEmails:string[]=[]
     //Convert dictionnary in an array AnonymizedPersonNames
-    for (var objet of dictionnary)
+    for (var objet of AnononymNamesEmails)
     {
         AnonymizedPersonNames.push(objet.Nom);
+        AnonymizedPersonEmails.push(objet.Mail);
     }
-    var AnonymizedPersonEmails:string[]=["hubert.dupont@gmail.com", "sandrine.martin54@yahoo.com", "jean.le.henaff@imagine.fr"];
+    
+
     var AnonymizedCompanyNames:string[]=["Monoprix","Paul","Imagine"];
+
+    console.log(AnonymizedPersonNames); 
+    console.log(AnonymizedPersonEmails); 
+    console.log(AnonymizedCompanyNames); 
 
     var data_string:string = JSON.stringify(dataToAnonymize);
 
