@@ -9,7 +9,7 @@ const csv = require("csv-parser");
 const path = require('path');
 var AnononymNamesEmails:any[]= [];
 
-const myPath = path.join(__dirname,'../noms.csv')
+const myPath = path.join(__dirname,'../anon-data.csv')
 const csvStream = fs.createReadStream(myPath).pipe(csvParser());
 csvStream.on('data', (data:string)=> {
     AnononymNamesEmails.push(data);
@@ -21,18 +21,16 @@ csvStream.on('end', () => {
   });
 
 const onDataReadFinished=()=>{
-    console.log(AnononymNamesEmails)
     var AnonymizedPersonNames:string[]=[]
     var AnonymizedPersonEmails:string[]=[]
+    var AnonymizedCompanyNames:string[]=[]
     //Convert dictionnary in an array AnonymizedPersonNames
     for (var objet of AnononymNamesEmails)
     {
-        AnonymizedPersonNames.push(objet.Nom);
+        AnonymizedPersonNames.push(objet.Name);
         AnonymizedPersonEmails.push(objet.Mail);
+        AnonymizedCompanyNames.push(objet.Company)
     }
-    
-
-    var AnonymizedCompanyNames:string[]=["Monoprix","Paul","Imagine"];
 
     console.log(AnonymizedPersonNames); 
     console.log(AnonymizedPersonEmails); 

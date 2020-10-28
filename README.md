@@ -8,9 +8,11 @@ mais on ne rate pas d'élément de la blacklist
 -nom et mail non accordées
 -blacklist donnée par champ
 -pas de Map mais des array d'objets
+-créer un fichier generate-anonym-attrib qui crée un csv avec 3 listes de noms,
+ mails, entreprises aléatoires 
 
 A faire : 
--créer un fichier generate-anonym-attrib qui crée un csv avec 3 listes de noms, mails, entreprises aléatoires 
+
 -ne plus utiliser stringlify couteux mais parcourir les attributs
 (message.requester/submitter.name/email (4champs), 
 message.message.requester/submitter.organization.name, 
