@@ -1,4 +1,4 @@
-const faker = require("faker");
+const faker = require("faker/locale/en");
 
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const csvWriter = createCsvWriter({
@@ -6,7 +6,7 @@ const csvWriter = createCsvWriter({
   header: [
     {id: 'name', title: 'Name'},
     {id: 'mail', title: 'Mail'},
-    {id: 'company', title: 'Company'},
+    {id: 'organization', title: 'Organization'},
   ]
 });
 
@@ -22,19 +22,19 @@ function genere_mail(name:string){
 
 }
 
-const data=[]
+const data=[];
+const data_size=10;
 
-for (var i=0;i<100;i++){
+for (var i=0;i<data_size;i++){
     let rand_name=faker.name.findName()  
     data.push({
         name : rand_name, 
         mail : genere_mail(rand_name), 
-        company : faker.company.companyName()
+        organization : faker.company.companyName()
     });
-    console.log(data.length);
 }
 
-
+console.log("Anonym data",data)
 
 
 csvWriter
