@@ -1,60 +1,80 @@
 "use strict";
-var __spreadArrays = (this && this.__spreadArrays) || function () {
-    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
-    for (var r = Array(s), k = 0, i = 0; i < il; i++)
-        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
-            r[k] = a[j];
-    return r;
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var data_to_anonymize_1 = require("./data/data-to-anonymize");
 var blacklist_1 = require("./data/blacklist");
+var csv_parser_1 = __importDefault(require("csv-parser"));
+//Open files .csv containing our data (Name, emails Organization Name,  )
 var fs = require("fs");
 var csv = require("csv-parser");
 var path = require('path');
-var results = [];
-var myPath = path.join(__dirname, '../noms.csv');
-fs.createReadStream(myPath).pipe(csv()).on('data', function (data) { return results.push(data); });
-var AnonymizedPersonNames = [];
-for (var _i = 0, results_1 = results; _i < results_1.length; _i++) {
-    var objet = results_1[_i];
-    AnonymizedPersonNames.push(objet.Nom);
-}
-console.log(results);
-console.log(AnonymizedPersonNames);
-var AnonymizedPersonEmails = ["hubert.dupont@gmail.com", "sandrine.martin54@yahoo.com", "jean.le.henaff@imagine.fr"];
-var AnonymizedCompanyNames = ["Monoprix", "Paul", "Imagine"];
-var anonymizedAttributes = __spreadArrays(AnonymizedPersonNames, AnonymizedPersonEmails, AnonymizedCompanyNames);
-var correspondance = new Map();
-for (var _a = 0, blackListElements_1 = blacklist_1.blackListElements; _a < blackListElements_1.length; _a++) {
-    var black_listed = blackListElements_1[_a];
-    if (correspondance.get(black_listed) == null) {
-        if (black_listed.includes("@")) {
-            var rd = Math.floor(Math.random() * AnonymizedPersonEmails.length);
-            correspondance.set(black_listed, AnonymizedPersonEmails[rd]);
-            AnonymizedPersonEmails.splice(rd, 1);
-        }
-        else {
-            if (black_listed.includes(" ")) {
-                var rd = Math.floor(Math.random() * AnonymizedPersonNames.length);
-                correspondance.set(black_listed, AnonymizedPersonNames[rd]);
-                AnonymizedPersonNames.splice(rd, 1);
+var AnononymAttribute = [];
+var myPath = path.join(__dirname, '../anon-data.csv');
+var csvStream = fs.createReadStream(myPath).pipe(csv_parser_1.default());
+csvStream.on('data', function (data) {
+    AnononymAttribute.push(data);
+    // use row data
+});
+csvStream.on('end', function () {
+    onDataReadFinished();
+});
+var onDataReadFinished = function () {
+    var AnonymizedPersonNames = [];
+    var AnonymizedPersonEmails = [];
+    var AnonymizedOrganizationNames = [];
+    //Convert dictionnary in an array AnonymizedPersonNames
+    for (var _i = 0, AnononymAttribute_1 = AnononymAttribute; _i < AnononymAttribute_1.length; _i++) {
+        var objet = AnononymAttribute_1[_i];
+        AnonymizedPersonNames.push(objet.Name);
+        AnonymizedPersonEmails.push(objet.Mail);
+        AnonymizedOrganizationNames.push(objet.Organization);
+    }
+    console.log("Blacklist Names", blacklist_1.blacklistPersonNames);
+    console.log("Blacklist Emails", blacklist_1.blacklistPersonEmails);
+    console.log("Blacklist Companies", blacklist_1.blacklistOrganizationNames);
+    console.log("Anonym Names", AnonymizedPersonNames);
+    console.log("Anonym Emails", AnonymizedPersonEmails);
+    console.log("Anonym Organization", AnonymizedOrganizationNames);
+    for (var _a = 0, dataToAnonymize_1 = data_to_anonymize_1.dataToAnonymize; _a < dataToAnonymize_1.length; _a++) {
+        var message = dataToAnonymize_1[_a];
+        for (var _b = 0, blacklistPersonNames_1 = blacklist_1.blacklistPersonNames; _b < blacklistPersonNames_1.length; _b++) {
+            var black_listed_name = blacklistPersonNames_1[_b];
+            var reg = new RegExp(black_listed_name, 'gi');
+            var rd = Math.floor(Math.random() * AnonymizedPersonNames.length);
+            message.requester.name = message.requester.name.replace(reg, AnonymizedPersonNames[rd]);
+            message.submitter.name = message.submitter.name.replace(reg, AnonymizedPersonNames[rd]);
+            if (Object.keys(message).includes("content")) {
+                message.content = message.content.replace(reg, AnonymizedPersonNames[rd]);
             }
-            else {
-                var rd = Math.floor(Math.random() * AnonymizedCompanyNames.length);
-                correspondance.set(black_listed, AnonymizedCompanyNames[rd]);
-                AnonymizedCompanyNames.splice(rd, 1);
+        }
+        for (var _c = 0, blacklistPersonEmails_1 = blacklist_1.blacklistPersonEmails; _c < blacklistPersonEmails_1.length; _c++) {
+            var black_listed_mail = blacklistPersonEmails_1[_c];
+            var reg = new RegExp(black_listed_mail, 'gi');
+            var rd = Math.floor(Math.random() * AnonymizedPersonEmails.length);
+            message.requester.email = message.requester.email.replace(reg, AnonymizedPersonEmails[rd]);
+            message.submitter.email = message.submitter.email.replace(reg, AnonymizedPersonEmails[rd]);
+            if (Object.keys(message).includes("content")) {
+                message.content = message.content.replace(reg, AnonymizedPersonEmails[rd]);
+            }
+        }
+        for (var _d = 0, blacklistOrganizationNames_1 = blacklist_1.blacklistOrganizationNames; _d < blacklistOrganizationNames_1.length; _d++) {
+            var black_listed_company = blacklistOrganizationNames_1[_d];
+            var reg = new RegExp(black_listed_company, 'gi');
+            var rd = Math.floor(Math.random() * AnonymizedOrganizationNames.length);
+            if (Object.keys(message.requester).includes("organization")) {
+                message.requester.organization.name = message.requester.organization.name.replace(reg, AnonymizedOrganizationNames[rd]);
+            }
+            if (Object.keys(message.submitter).includes("organization")) {
+                message.submitter.organization.name = message.submitter.organization.name.replace(reg, AnonymizedOrganizationNames[rd]);
+            }
+            if (Object.keys(message).includes("content")) {
+                message.content = message.content.replace(reg, AnonymizedOrganizationNames[rd]);
             }
         }
     }
-}
-console.log(correspondance);
-var data_string = JSON.stringify(data_to_anonymize_1.dataToAnonymize);
-console.log(data_to_anonymize_1.dataToAnonymize);
-for (var _b = 0, blackListElements_2 = blacklist_1.blackListElements; _b < blackListElements_2.length; _b++) {
-    var black_listed = blackListElements_2[_b];
-    var reg = new RegExp(black_listed, 'gi');
-    data_string = data_string.replace(reg, correspondance.get(black_listed));
-}
-var anonymizedData = JSON.parse(data_string);
-console.log(anonymizedData);
+    //displays the anonymized messages 
+    console.log("The anonymized data : ", data_to_anonymize_1.dataToAnonymize);
+    console.log("Zoom on an organization : ", data_to_anonymize_1.dataToAnonymize[0].submitter.organization);
+};

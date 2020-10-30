@@ -1,3 +1,4 @@
+import { Interface } from "readline";
 import { MessageChannel } from "worker_threads";
 
 interface Organization {

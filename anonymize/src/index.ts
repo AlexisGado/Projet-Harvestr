@@ -37,7 +37,7 @@ const onDataReadFinished=()=>{
     console.log("Anonym Names",AnonymizedPersonNames); 
     console.log("Anonym Emails", AnonymizedPersonEmails); 
     console.log("Anonym Organization", AnonymizedOrganizationNames); 
-    
+
 
     for (var message of dataToAnonymize){
         
