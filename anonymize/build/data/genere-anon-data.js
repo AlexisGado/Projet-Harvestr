@@ -1,7 +1,7 @@
 "use strict";
-var faker = require("faker/locale/en");
-var createCsvWriter = require('csv-writer').createObjectCsvWriter;
-var csvWriter = createCsvWriter({
+const faker = require("faker/locale/en");
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+const csvWriter = createCsvWriter({
     path: 'anon-data.csv',
     header: [
         { id: 'name', title: 'Name' },
@@ -10,18 +10,18 @@ var csvWriter = createCsvWriter({
     ]
 });
 function genere_mail(name) {
-    var mail_part1 = name.replace(/\s/g, ".");
+    let mail_part1 = name.replace(/\s/g, ".");
     mail_part1 = mail_part1.toLowerCase();
-    var mail_part2 = faker.internet.email();
-    var tab = mail_part2.split("@");
+    let mail_part2 = faker.internet.email();
+    let tab = mail_part2.split("@");
     mail_part2 = tab.pop();
-    var mail = mail_part1.concat("@", mail_part2);
+    let mail = mail_part1.concat("@", mail_part2);
     return mail;
 }
-var data = [];
-var data_size = 10;
+const data = [];
+const data_size = 10;
 for (var i = 0; i < data_size; i++) {
-    var rand_name = faker.name.findName();
+    let rand_name = faker.name.findName();
     data.push({
         name: rand_name,
         mail: genere_mail(rand_name),
@@ -31,4 +31,4 @@ for (var i = 0; i < data_size; i++) {
 console.log("Anonym data", data);
 csvWriter
     .writeRecords(data)
-    .then(function () { return console.log('The CSV file was written successfully'); });
+    .then(() => console.log('The CSV file was written successfully'));

@@ -47,3 +47,4 @@ let M3:Message = {id:"msg3", requester:Requester3,submitter:Submitter3, title : 
 export const dataToAnonymize: Message[] = [M1,M2,M3];
 
 export {Message,Person,Organization,SubMessage};
+

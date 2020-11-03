@@ -1,4 +1,4 @@
-import {dataToAnonymize} from './data/data-to-anonymize';
+import {dataToAnonymize,Message,Person,Organization,SubMessage} from './data/data-to-anonymize';
 import {blacklistPersonNames, blacklistPersonEmails, blacklistOrganizationNames} from './data/blacklist';
 import { PRIORITY_BELOW_NORMAL } from 'constants';
 import csvParser from 'csv-parser';
@@ -38,46 +38,87 @@ const onDataReadFinished=()=>{
     console.log("Anonym Emails", AnonymizedPersonEmails); 
     console.log("Anonym Organization", AnonymizedOrganizationNames); 
 
+    function replace(attribute_to_anonymize:any,blacklist_elt:RegExp,anon_elt:string){
+        if (typeof attribute_to_anonymize==="string"){
+            return attribute_to_anonymize.replace(blacklist_elt,anon_elt);
+        }
+    }  
 
-    for (var message of dataToAnonymize){
+    function walking_organization(organization:Organization,blacklist_elt:RegExp,anon_elt:string){
+        for (const key in organization){
+            const k=key as keyof Organization;
+            if (typeof organization[k]==="string"){
+                organization[k]=replace(organization[k],blacklist_elt,anon_elt) as any;
+            }
+        }
+        return organization;
         
-        for (var black_listed_name of blacklistPersonNames){
-            var reg = new RegExp(black_listed_name,'gi');
-            var rd = Math.floor(Math.random() * AnonymizedPersonNames.length);
-            message.requester.name=message.requester.name.replace(reg,AnonymizedPersonNames[rd]);
-            message.submitter.name=message.submitter.name.replace(reg,AnonymizedPersonNames[rd]);
-            if (Object.keys(message).includes("content")){
-                message.content=message.content!.replace(reg,AnonymizedPersonNames[rd]);
+    }
+    function walking_person(person:Person,blacklist_elt:RegExp,anon_elt:string){
+        for (const key in person){
+            const k=key as keyof Person;
+            if (typeof person[k]==="string"){
+                person[k]=replace(person[k],blacklist_elt,anon_elt) as any ;
             }
         }
-
-        for (var black_listed_mail of blacklistPersonEmails){
-            var reg = new RegExp(black_listed_mail,'gi');
-            var rd = Math.floor(Math.random() * AnonymizedPersonEmails.length);
-            message.requester.email=message.requester.email.replace(reg,AnonymizedPersonEmails[rd]);
-            message.submitter.email=message.submitter.email.replace(reg,AnonymizedPersonEmails[rd]);              
-            if (Object.keys(message).includes("content")){
-                message.content=message.content!.replace(reg,AnonymizedPersonEmails[rd]);
-            }
+        if (person.organization){
+            person.organization=walking_organization(person.organization,blacklist_elt,anon_elt)
         }
-
-        for (var black_listed_company of blacklistOrganizationNames){
-            var reg = new RegExp(black_listed_company,'gi');
-            var rd = Math.floor(Math.random() * AnonymizedOrganizationNames.length);
-            if (Object.keys(message.requester).includes("organization")){
-                message.requester.organization!.name=message.requester.organization!.name.replace(reg,AnonymizedOrganizationNames[rd]);
-            }
-            if (Object.keys(message.submitter).includes("organization")){
-                message.submitter.organization!.name=message.submitter.organization!.name.replace(reg,AnonymizedOrganizationNames[rd]);
-            }
-            if (Object.keys(message).includes("content")){
-                message.content=message.content!.replace(reg,AnonymizedOrganizationNames[rd]);
-            }
-        } 
+        return person;
     }
 
+    function walking_message(message:Message,blacklist_elt:RegExp,anon_elt:string){
+        for (const key in message){
+            const k=key as keyof Message;
+            if (typeof message[k]==="string"){
+                message[k]=replace(message[k],blacklist_elt,anon_elt) as any;
+            }
+        }
+        for (var person of [message.requester,message.submitter]){
+            person=walking_person(person,blacklist_elt,anon_elt);
+        }
+        if (message.sub_messages){
+            for (var submessage of message.sub_messages){
+                submessage=walking_submessage(submessage,blacklist_elt,anon_elt);
+            }
+        }
+        return message;
+    }
     
+    function walking_submessage(submessage:SubMessage,blacklist_elt:RegExp,anon_elt:string){
+        for (const key in submessage){
+            const k=key as keyof SubMessage;
+            if (typeof submessage[k]==="string"){
+                submessage[k]!=replace(submessage[k],blacklist_elt,anon_elt)
+            }
+        }
+        submessage.submitter=walking_person(submessage.submitter,blacklist_elt,anon_elt);
+        return submessage;
+    }
+    
+    function walking_blacklist(message:Message, blacklist:string[],anonAttribute:string[]){
+        for (var blacklist_elt of blacklist){
+            var reg = new RegExp(blacklist_elt,'gi');
+            var rd = Math.floor(Math.random() * anonAttribute.length);
+            message=walking_message(message,reg,anonAttribute[rd])
+        }
+        return message
+    }
+
+    const replacement={
+        name : { blacklist : blacklistPersonNames, anonym : AnonymizedPersonNames},
+        email : { blacklist : blacklistPersonEmails, anonym : AnonymizedPersonEmails },
+        organization :{ blacklist : blacklistOrganizationNames, anonym : AnonymizedOrganizationNames }            
+    }; 
+    
+    for (var message of dataToAnonymize){
+        message=walking_blacklist(message,blacklistPersonNames,AnonymizedPersonNames);
+        message=walking_blacklist(message,blacklistPersonEmails,AnonymizedPersonEmails);
+        message=walking_blacklist(message,blacklistOrganizationNames,AnonymizedOrganizationNames);
+    }
     //displays the anonymized messages 
     console.log("The anonymized data : ", dataToAnonymize);
     console.log("Zoom on an organization : ", dataToAnonymize[0].submitter.organization!);
+
 }
+
