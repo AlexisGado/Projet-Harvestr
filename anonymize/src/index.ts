@@ -2,6 +2,8 @@ import {dataToAnonymize,Message,Person,Organization,SubMessage} from './data/dat
 import {blacklistPersonNames, blacklistPersonEmails, blacklistOrganizationNames} from './data/blacklist';
 import { PRIORITY_BELOW_NORMAL } from 'constants';
 import csvParser from 'csv-parser';
+import { Interface } from 'readline';
+var cloneDeep = require('lodash.clonedeep');
 
 //Open files .csv containing our data (Name, emails Organization Name,  )
 const fs = require("fs");
@@ -21,6 +23,7 @@ csvStream.on('end', () => {
   });
 
 const onDataReadFinished=()=>{
+
     var AnonymizedPersonNames:string[]=[]
     var AnonymizedPersonEmails:string[]=[]
     var AnonymizedOrganizationNames:string[]=[]
@@ -31,6 +34,7 @@ const onDataReadFinished=()=>{
         AnonymizedPersonEmails.push(objet.Mail);
         AnonymizedOrganizationNames.push(objet.Organization)
     }
+
     console.log("Blacklist Names",blacklistPersonNames);
     console.log("Blacklist Emails", blacklistPersonEmails);
     console.log("Blacklist Companies", blacklistOrganizationNames);
@@ -38,27 +42,25 @@ const onDataReadFinished=()=>{
     console.log("Anonym Emails", AnonymizedPersonEmails); 
     console.log("Anonym Organization", AnonymizedOrganizationNames); 
 
-    function replace(attribute_to_anonymize:any,blacklist_elt:RegExp,anon_elt:string){
-        if (typeof attribute_to_anonymize==="string"){
-            return attribute_to_anonymize.replace(blacklist_elt,anon_elt);
-        }
-    }  
+    // function replace(attribute_to_anonymize:string,blacklist_elt:RegExp,anon_elt:string){
+    //     return attribute_to_anonymize.replace(blacklist_elt,anon_elt);
+    // }
 
     function walking_organization(organization:Organization,blacklist_elt:RegExp,anon_elt:string){
         for (const key in organization){
             const k=key as keyof Organization;
             if (typeof organization[k]==="string"){
-                organization[k]=replace(organization[k],blacklist_elt,anon_elt) as any;
+                organization[k] = organization[k].replace(blacklist_elt,anon_elt);
             }
         }
         return organization;
-        
     }
+
     function walking_person(person:Person,blacklist_elt:RegExp,anon_elt:string){
         for (const key in person){
             const k=key as keyof Person;
             if (typeof person[k]==="string"){
-                person[k]=replace(person[k],blacklist_elt,anon_elt) as any ;
+                (person[k] as string) = (person[k] as string).replace(blacklist_elt,anon_elt);
             }
         }
         if (person.organization){
@@ -71,7 +73,7 @@ const onDataReadFinished=()=>{
         for (const key in message){
             const k=key as keyof Message;
             if (typeof message[k]==="string"){
-                message[k]=replace(message[k],blacklist_elt,anon_elt) as any;
+                (message[k] as string) = (message[k] as string).replace(blacklist_elt,anon_elt);
             }
         }
         for (var person of [message.requester,message.submitter]){
@@ -89,7 +91,7 @@ const onDataReadFinished=()=>{
         for (const key in submessage){
             const k=key as keyof SubMessage;
             if (typeof submessage[k]==="string"){
-                submessage[k]!=replace(submessage[k],blacklist_elt,anon_elt)
+                (submessage[k] as string) = (submessage[k] as string).replace(blacklist_elt,anon_elt);
             }
         }
         submessage.submitter=walking_person(submessage.submitter,blacklist_elt,anon_elt);
@@ -105,20 +107,38 @@ const onDataReadFinished=()=>{
         return message
     }
 
-    const replacement={
+    interface  ReplacementSlot{
+        blacklist : string[];
+        anonym : string[];
+    }
+
+    interface Replacement
+    {
+        name : ReplacementSlot;
+        email : ReplacementSlot;
+        organization :ReplacementSlot;
+    }
+
+    const replacement : Replacement = {
         name : { blacklist : blacklistPersonNames, anonym : AnonymizedPersonNames},
         email : { blacklist : blacklistPersonEmails, anonym : AnonymizedPersonEmails },
         organization :{ blacklist : blacklistOrganizationNames, anonym : AnonymizedOrganizationNames }            
     }; 
     
+    var dataAnonymized:Message[] = [];
+
     for (var message of dataToAnonymize){
-        message=walking_blacklist(message,blacklistPersonNames,AnonymizedPersonNames);
-        message=walking_blacklist(message,blacklistPersonEmails,AnonymizedPersonEmails);
-        message=walking_blacklist(message,blacklistOrganizationNames,AnonymizedOrganizationNames);
+        var message_anonymized:Message = cloneDeep(message);
+        for (const key in replacement)
+        {
+            const k=key as keyof Replacement;
+            message_anonymized=walking_blacklist(message_anonymized,replacement[k].blacklist,replacement[k].anonym);
+        }
+        dataAnonymized.push(message_anonymized);
     }
+
     //displays the anonymized messages 
-    console.log("The anonymized data : ", dataToAnonymize);
-    console.log("Zoom on an organization : ", dataToAnonymize[0].submitter.organization!);
-
+    console.log("The data to anonymize : ", dataToAnonymize);
+    console.log("The anonymized data : ", dataAnonymized);
+    console.log("Zoom on an organization : ", dataAnonymized[0].submitter.organization!);
 }
-

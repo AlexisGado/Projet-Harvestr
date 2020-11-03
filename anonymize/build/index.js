@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const data_to_anonymize_1 = require("./data/data-to-anonymize");
 const blacklist_1 = require("./data/blacklist");
 const csv_parser_1 = __importDefault(require("csv-parser"));
+var cloneDeep = require('lodash.clonedeep');
 //Open files .csv containing our data (Name, emails Organization Name,  )
 const fs = require("fs");
 const csv = require("csv-parser");
@@ -45,7 +46,7 @@ const onDataReadFinished = () => {
         for (const key in organization) {
             const k = key;
             if (typeof organization[k] === "string") {
-                organization[k] = replace(organization[k], blacklist_elt, anon_elt);
+                organization[k].replace(blacklist_elt, anon_elt);
             }
         }
         return organization;
@@ -54,7 +55,7 @@ const onDataReadFinished = () => {
         for (const key in person) {
             const k = key;
             if (typeof person[k] === "string") {
-                person[k] = replace(person[k], blacklist_elt, anon_elt);
+                person[k].replace(blacklist_elt, anon_elt);
             }
         }
         if (person.organization) {
@@ -66,7 +67,7 @@ const onDataReadFinished = () => {
         for (const key in message) {
             const k = key;
             if (typeof message[k] === "string") {
-                message[k] = replace(message[k], blacklist_elt, anon_elt);
+                message[k].replace(blacklist_elt, anon_elt);
             }
         }
         for (var person of [message.requester, message.submitter]) {
@@ -83,7 +84,7 @@ const onDataReadFinished = () => {
         for (const key in submessage) {
             const k = key;
             if (typeof submessage[k] === "string") {
-                submessage[k] != replace(submessage[k], blacklist_elt, anon_elt);
+                submessage[k].replace(blacklist_elt, anon_elt);
             }
         }
         submessage.submitter = walking_person(submessage.submitter, blacklist_elt, anon_elt);
@@ -102,12 +103,17 @@ const onDataReadFinished = () => {
         email: { blacklist: blacklist_1.blacklistPersonEmails, anonym: AnonymizedPersonEmails },
         organization: { blacklist: blacklist_1.blacklistOrganizationNames, anonym: AnonymizedOrganizationNames }
     };
+    var dataAnonymized = [];
     for (var message of data_to_anonymize_1.dataToAnonymize) {
-        message = walking_blacklist(message, blacklist_1.blacklistPersonNames, AnonymizedPersonNames);
-        message = walking_blacklist(message, blacklist_1.blacklistPersonEmails, AnonymizedPersonEmails);
-        message = walking_blacklist(message, blacklist_1.blacklistOrganizationNames, AnonymizedOrganizationNames);
+        var message_copy = cloneDeep(message);
+        var message_anonymized;
+        for (const key in replacement) {
+            const k = key;
+            message_anonymized = walking_blacklist(message_copy, replacement[k].blacklist, replacement[k].anonym);
+        }
+        dataAnonymized.push(message_anonymized);
     }
     //displays the anonymized messages 
-    console.log("The anonymized data : ", data_to_anonymize_1.dataToAnonymize);
-    console.log("Zoom on an organization : ", data_to_anonymize_1.dataToAnonymize[0].submitter.organization);
+    console.log("The anonymized data : ", dataAnonymized);
+    console.log("Zoom on an organization : ", dataAnonymized[0].submitter.organization);
 };

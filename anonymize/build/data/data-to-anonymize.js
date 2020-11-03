@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.dataToAnonymize = void 0;
 let CompanyReq1 = { id: "company1", name: "Tesla" };
 let CompanySub1 = { id: "company1", name: "Hollywood" };
 let Requester1 = { id: "req1", name: "Elon Musk", email: "elon.musk@tesla.com", organization: CompanyReq1 };
