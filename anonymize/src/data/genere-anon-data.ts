@@ -10,7 +10,7 @@ const csvWriter = createCsvWriter({
   ]
 });
 
-
+//given a name, return an matching email, but unuseful in our algorithm
 function genere_mail(name:string){
     let mail_part1=name.replace(/\s/g, ".");
     mail_part1=mail_part1.toLowerCase();
@@ -23,18 +23,19 @@ function genere_mail(name:string){
 }
 
 const data=[];
+//Number of false identity
 const data_size=10;
 
+//fill the csv file with anonyme attributes
 for (var i=0;i<data_size;i++){
-    let rand_name=faker.name.findName()  
     data.push({
-        name : rand_name, 
-        mail : genere_mail(rand_name), 
+        name : faker.name.findName(), 
+        mail : faker.internet.email(), 
         organization : faker.company.companyName()
     });
 }
 
-console.log("Anonym data",data)
+//console.log("Anonym data",data)
 
 
 csvWriter

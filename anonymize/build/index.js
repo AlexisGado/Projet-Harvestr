@@ -31,89 +31,51 @@ const onDataReadFinished = () => {
         AnonymizedPersonEmails.push(objet.Mail);
         AnonymizedOrganizationNames.push(objet.Organization);
     }
+    const replacement = {
+        name: { blacklist: blacklist_1.blacklistPersonNames, anonym: AnonymizedPersonNames },
+        email: { blacklist: blacklist_1.blacklistPersonEmails, anonym: AnonymizedPersonEmails },
+        organization: { blacklist: blacklist_1.blacklistOrganizationNames, anonym: AnonymizedOrganizationNames }
+    };
     console.log("Blacklist Names", blacklist_1.blacklistPersonNames);
     console.log("Blacklist Emails", blacklist_1.blacklistPersonEmails);
     console.log("Blacklist Companies", blacklist_1.blacklistOrganizationNames);
     console.log("Anonym Names", AnonymizedPersonNames);
     console.log("Anonym Emails", AnonymizedPersonEmails);
     console.log("Anonym Organization", AnonymizedOrganizationNames);
-    function replace(attribute_to_anonymize, blacklist_elt, anon_elt) {
-        if (typeof attribute_to_anonymize === "string") {
-            return attribute_to_anonymize.replace(blacklist_elt, anon_elt);
-        }
-    }
-    function walking_organization(organization, blacklist_elt, anon_elt) {
-        for (const key in organization) {
+    function walking(object, blacklist_elt, anon_elt) {
+        for (const key in object) {
             const k = key;
-            if (typeof organization[k] === "string") {
-                organization[k].replace(blacklist_elt, anon_elt);
+            if (typeof object[k] === "string") {
+                object[k] = object[k].replace(blacklist_elt, anon_elt);
+                console.log(object[k]);
+            }
+            else {
+                object[k] = walking(object[k], blacklist_elt, anon_elt);
+                //no solution was found to avoid "as any"
             }
         }
-        return organization;
-    }
-    function walking_person(person, blacklist_elt, anon_elt) {
-        for (const key in person) {
-            const k = key;
-            if (typeof person[k] === "string") {
-                person[k].replace(blacklist_elt, anon_elt);
-            }
-        }
-        if (person.organization) {
-            person.organization = walking_organization(person.organization, blacklist_elt, anon_elt);
-        }
-        return person;
-    }
-    function walking_message(message, blacklist_elt, anon_elt) {
-        for (const key in message) {
-            const k = key;
-            if (typeof message[k] === "string") {
-                message[k].replace(blacklist_elt, anon_elt);
-            }
-        }
-        for (var person of [message.requester, message.submitter]) {
-            person = walking_person(person, blacklist_elt, anon_elt);
-        }
-        if (message.sub_messages) {
-            for (var submessage of message.sub_messages) {
-                submessage = walking_submessage(submessage, blacklist_elt, anon_elt);
-            }
-        }
-        return message;
-    }
-    function walking_submessage(submessage, blacklist_elt, anon_elt) {
-        for (const key in submessage) {
-            const k = key;
-            if (typeof submessage[k] === "string") {
-                submessage[k].replace(blacklist_elt, anon_elt);
-            }
-        }
-        submessage.submitter = walking_person(submessage.submitter, blacklist_elt, anon_elt);
-        return submessage;
+        return object;
     }
     function walking_blacklist(message, blacklist, anonAttribute) {
         for (var blacklist_elt of blacklist) {
             var reg = new RegExp(blacklist_elt, 'gi');
             var rd = Math.floor(Math.random() * anonAttribute.length);
-            message = walking_message(message, reg, anonAttribute[rd]);
+            message = walking(message, reg, anonAttribute[rd]);
         }
         return message;
     }
-    const replacement = {
-        name: { blacklist: blacklist_1.blacklistPersonNames, anonym: AnonymizedPersonNames },
-        email: { blacklist: blacklist_1.blacklistPersonEmails, anonym: AnonymizedPersonEmails },
-        organization: { blacklist: blacklist_1.blacklistOrganizationNames, anonym: AnonymizedOrganizationNames }
-    };
     var dataAnonymized = [];
     for (var message of data_to_anonymize_1.dataToAnonymize) {
-        var message_copy = cloneDeep(message);
-        var message_anonymized;
+        var message_anonymized = cloneDeep(message);
         for (const key in replacement) {
             const k = key;
-            message_anonymized = walking_blacklist(message_copy, replacement[k].blacklist, replacement[k].anonym);
+            message_anonymized = walking_blacklist(message_anonymized, replacement[k].blacklist, replacement[k].anonym);
         }
         dataAnonymized.push(message_anonymized);
     }
     //displays the anonymized messages 
+    console.log("The data to anonymize : ", data_to_anonymize_1.dataToAnonymize);
     console.log("The anonymized data : ", dataAnonymized);
     console.log("Zoom on an organization : ", dataAnonymized[0].submitter.organization);
+    console.log("Zoom on submessages : ", dataAnonymized[0].sub_messages);
 };
