@@ -1,19 +1,19 @@
-import {dataToAnonymize} from './data/data-to-anonymize';
-import {blacklistPersonNames, blacklistPersonEmails, blacklistCompanyNames} from './data/blacklist';
-import { PRIORITY_BELOW_NORMAL } from 'constants';
+import {dataToAnonymize,Message,Person,Organization,SubMessage} from './data/data-to-anonymize';
+import {blacklistPersonNames, blacklistPersonEmails, blacklistOrganizationNames} from './data/blacklist';
 import csvParser from 'csv-parser';
+var cloneDeep = require('lodash.clonedeep');
 
-//Open files .csv containing our data (Name, emails Company Name,  )
+//Open files .csv containing our data (Name, emails Organization Name,  )
 const fs = require("fs");
 const csv = require("csv-parser");
 const path = require('path');
-var AnononymNamesEmails:any[]= [];
+var AnononymAttribute:any[]= [];
 
 const myPath = path.join(__dirname,'../anon-data.csv')
 const csvStream = fs.createReadStream(myPath).pipe(csvParser());
 csvStream.on('data', (data:string)=> {
-    AnononymNamesEmails.push(data);
-    // use row data
+    AnononymAttribute.push(data);
+    // read anonymized attribute data
 });
 
 csvStream.on('end', () => {
@@ -21,48 +21,87 @@ csvStream.on('end', () => {
   });
 
 const onDataReadFinished=()=>{
+
     var AnonymizedPersonNames:string[]=[]
     var AnonymizedPersonEmails:string[]=[]
-    var AnonymizedCompanyNames:string[]=[]
-    //Convert dictionnary in an array AnonymizedPersonNames
-    for (var objet of AnononymNamesEmails)
+    var AnonymizedOrganizationNames:string[]=[]
+    //Split anonymized attribute data in three categories: name, email, organization
+    for (var objet of AnononymAttribute)
     {
         AnonymizedPersonNames.push(objet.Name);
         AnonymizedPersonEmails.push(objet.Mail);
-        AnonymizedCompanyNames.push(objet.Company)
+        AnonymizedOrganizationNames.push(objet.Organization)
     }
 
-    console.log(AnonymizedPersonNames); 
-    console.log(AnonymizedPersonEmails); 
-    console.log(AnonymizedCompanyNames); 
-
-    var data_string:string = JSON.stringify(dataToAnonymize);
-
-    //displays the message we want to anonymize
-    console.log("The data to anonymize : ", dataToAnonymize);
-
-    //walk the blacklist and replace by its anonymized correspondance
-
-    for (var black_listed_name of blacklistPersonNames){
-        var reg = new RegExp(black_listed_name,'gi');
-        var rd = Math.floor(Math.random() * AnonymizedPersonNames.length);
-        data_string  = data_string.replace(reg,AnonymizedPersonNames[rd]);
+    interface  ReplacementSlot{
+        blacklist : string[];
+        anonym : string[];
     }
 
-    for (var black_listed_mail of blacklistPersonEmails){
-        var reg = new RegExp(black_listed_mail,'gi');
-        var rd = Math.floor(Math.random() * AnonymizedPersonEmails.length);
-        data_string  = data_string.replace(reg,AnonymizedPersonEmails[rd]);
+    interface Replacement
+    {
+        name : ReplacementSlot;
+        email : ReplacementSlot;
+        organization :ReplacementSlot;
     }
+    //Give the word we want to replace and the word we want to put instead
+    const replacement : Replacement = {
+        name : { blacklist : blacklistPersonNames, anonym : AnonymizedPersonNames},
+        email : { blacklist : blacklistPersonEmails, anonym : AnonymizedPersonEmails },
+        organization :{ blacklist : blacklistOrganizationNames, anonym : AnonymizedOrganizationNames }            
+    }; 
 
-    for (var black_listed_company of blacklistCompanyNames){
-        var reg = new RegExp(black_listed_company,'gi');
-        var rd = Math.floor(Math.random() * AnonymizedCompanyNames.length);
-        data_string  = data_string.replace(reg,AnonymizedCompanyNames[rd]);
+    /*console.log("Blacklist Names",blacklistPersonNames);
+    console.log("Blacklist Emails", blacklistPersonEmails);
+    console.log("Blacklist Companies", blacklistOrganizationNames);
+    console.log("Anonym Names",AnonymizedPersonNames); 
+    console.log("Anonym Emails", AnonymizedPersonEmails); 
+    console.log("Anonym Organization", AnonymizedOrganizationNames); */
+
+    type MessageComponents = Message | Person | SubMessage | Organization;
+
+    //recursive function which permit to explore all the message properties 
+    //and change them if some words are blacklisted
+    function go_through(object : MessageComponents ,blacklist_elt:RegExp,anon_elt:string){
+        for (const key in object){
+            const k=key as keyof (Message | Person | SubMessage | Organization);
+            //if the attribute is a string, we are looking for blacklist-elt and possibly replace it
+            if (typeof object[k]==="string"){
+                (object[k] as string) = (object[k] as string).replace(blacklist_elt,anon_elt);
+            }
+            //else, we apply the function on the attribute
+            else{
+                (object[k] as any)= go_through(object[k] as any , blacklist_elt,anon_elt) 
+                //no solution was found to avoid "as any"
+            }
+        }
+        return object;
     }
+    //for a given message, go through blacklist 
+    function go_through_blacklist(message:Message, blacklist:string[],anonAttribute:string[]){
+        for (var blacklist_elt of blacklist){
+            var reg = new RegExp(blacklist_elt,'gi');
+            var rd = Math.floor(Math.random() * anonAttribute.length);
+            message=go_through(message,reg,anonAttribute[rd]) as Message;
+        }
+        return message
+    }
+    //The list of anonymized message 
+    var dataAnonymized:Message[] = [];
 
-    var anonymizedData=JSON.parse(data_string);
+    //
+    for (var message of dataToAnonymize){
+        var message_anonymized:Message = cloneDeep(message);
+        for (const key in replacement){
+            const k=key as keyof Replacement;
+            message_anonymized=go_through_blacklist(message_anonymized,replacement[k].blacklist,replacement[k].anonym);
+        }
+        dataAnonymized.push(message_anonymized);
+    }
 
     //displays the anonymized messages 
-    console.log("The anonymized data : ", anonymizedData);
+    /*console.log("The data to anonymize : ", dataToAnonymize);
+    console.log("The anonymized data : ", dataAnonymized);
+    console.log("Zoom on an organization : ", dataAnonymized[0].submitter.organization!);
+    console.log("Zoom on submessages : ", dataAnonymized[0].sub_messages!);*/
 }

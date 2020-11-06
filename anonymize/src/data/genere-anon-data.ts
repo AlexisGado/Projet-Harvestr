@@ -1,4 +1,4 @@
-const faker = require("faker");
+const faker = require("faker/locale/en");
 
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const csvWriter = createCsvWriter({
@@ -6,11 +6,11 @@ const csvWriter = createCsvWriter({
   header: [
     {id: 'name', title: 'Name'},
     {id: 'mail', title: 'Mail'},
-    {id: 'company', title: 'Company'},
+    {id: 'organization', title: 'Organization'},
   ]
 });
 
-
+//given a name, return an matching email, but unuseful in our algorithm
 function genere_mail(name:string){
     let mail_part1=name.replace(/\s/g, ".");
     mail_part1=mail_part1.toLowerCase();
@@ -22,19 +22,20 @@ function genere_mail(name:string){
 
 }
 
-const data=[]
+const data=[];
+//Number of false identity
+const data_size=10;
 
-for (var i=0;i<100;i++){
-    let rand_name=faker.name.findName()  
+//fill the csv file with anonyme attributes
+for (var i=0;i<data_size;i++){
     data.push({
-        name : rand_name, 
-        mail : genere_mail(rand_name), 
-        company : faker.company.companyName()
+        name : faker.name.findName(), 
+        mail : faker.internet.email(), 
+        organization : faker.company.companyName()
     });
-    console.log(data.length);
 }
 
-
+//console.log("Anonym data",data)
 
 
 csvWriter
