@@ -1,4 +1,5 @@
 # Projet-Harvestr
+le fichier index.ts contient le script d'anonymisation 
 
 Fait : 
 
