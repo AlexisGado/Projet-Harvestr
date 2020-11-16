@@ -47,6 +47,7 @@ const onDataReadFinished = () => {
     const AnonymizedPersonNames: string[] = [];
     const AnonymizedPersonEmails: string[] = [];
     const AnonymizedOrganizationNames: string[] = [];
+
     //Split anonymized attribute data in three categories: name, email, organization
     for (const objet of AnononymAttribute) {
         AnonymizedPersonNames.push(objet.Name);
