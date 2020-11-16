@@ -26,20 +26,54 @@ interface Message {
     sub_messages?: SubMessage[];
 }
 
-let CompanyReq1={id : "company1", name : "Tesla"}
-let CompanySub1={id : "company1", name : "Hollywood"}
-let Requester1={id:"req1",name:"Elon Musk",email:"elon.musk@tesla.com", organization : CompanyReq1};
-let Submitter1={id:"submit1",name:"jean dujardin",email:"jean.dujardin@oss.fr", organization : CompanySub1};
-let SubMessage1={id :"submes1",submitter:Requester1,content:"paypal tesla and company"}
+let CompanyReq1 = { id: "company1", name: "Tesla" };
+let CompanySub1 = { id: "company1", name: "Hollywood" };
+let Requester1 = {
+    id: "req1",
+    name: "Elon Musk",
+    email: "elon.musk@tesla.com",
+    organization: CompanyReq1
+};
+let Submitter1 = {
+    id: "submit1",
+    name: "jean dujardin",
+    email: "jean.dujardin@oss.fr",
+    organization: CompanySub1
+};
+let SubMessage1 = {
+    id: "submes1",
+    submitter: Requester1,
+    content: "paypal tesla and company"
+};
 
-let Requester2={id:"req2",name:"Steve Jobs",email:"steve.jobs@rip.com"};
-let Submitter2={id:"submit2",name:"jean dujardin",email:"jean.dujardin@oss.fr"};
+let Requester2 = {
+    id: "req2",
+    name: "Steve Jobs",
+    email: "steve.jobs@rip.com"
+};
+let Submitter2 = {
+    id: "submit2",
+    name: "jean dujardin",
+    email: "jean.dujardin@oss.fr"
+};
 
 //Example messages adapted to the blacklist
-let M1:Message = {id:"msg1", requester:Requester1 ,submitter:Submitter1, title : "Paypal paying", content : "I'm sad that paypal not pay", sub_messages:[SubMessage1,SubMessage1] }
-let M2:Message = {id:"msg2", requester:Requester2,submitter:Submitter2, title : "Apple film", content : "I want to play in an apple film" }
+let M1: Message = {
+    id: "msg1",
+    requester: Requester1,
+    submitter: Submitter1,
+    title: "Paypal paying",
+    content: "I'm sad that paypal not pay",
+    sub_messages: [SubMessage1, SubMessage1]
+};
+let M2: Message = {
+    id: "msg2",
+    requester: Requester2,
+    submitter: Submitter2,
+    title: "Apple film",
+    content: "I want to play in an apple film"
+};
 
-export const dataToAnonymize: Message[] = [M1,M2];
+export const dataToAnonymize: Message[] = [M1, M2];
 
-export {Message,Person,Organization,SubMessage};
-
+export { Message, Person, Organization, SubMessage };
