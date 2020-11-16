@@ -1,7 +1,7 @@
 //console.log(process.argv[2]); argument suivant npx ts-node main.ts
 // chemin d'accès pour arreter le hardcode
 //const pathDataType: string = join(__dirname, "data", process.argv[2]);
-
+import { writeFileSync } from "fs";
 import { Message, Replacement, MessageComponents } from "./data/data-type"; //hardcode
 import {
   blacklistPersonNames,
@@ -132,4 +132,6 @@ const onDataReadFinished = () => {
     dataAnonymized[0].submitter.organization!
   );
   console.log("Zoom on submessages : ", dataAnonymized[0].sub_messages!);
+  const data = JSON.stringify(dataAnonymized);
+  writeFileSync(join(__dirname, "data-anonymized.json"), data);
 };
