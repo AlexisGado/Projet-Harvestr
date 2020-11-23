@@ -6,9 +6,9 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build": "rimraf ./dist && tsc",
-        "initialize_json":"ts-node ./src/data/data-to-anonymize.ts && ts-node ./src/data/genere-anon-data.ts && ts-node ./src/data/blacklist.ts",
+        "initialize_json": "ts-node ./src/data/data-to-anonymize.ts && ts-node ./src/data/genere-anon-data.ts && ts-node ./src/data/blacklist.ts",
         "start_default": "ts-node ./src/main.ts data-to-anonymize.json anon-data.json blacklist.json",
-        "initialize_json_js":"node ./dist/data/data-to-anonymize.js && node ./dist/data/genere-anon-data.js && node ./dist/data/blacklist.js",
+        "initialize_json_js": "node ./dist/data/data-to-anonymize.js && node ./dist/data/genere-anon-data.js && node ./dist/data/blacklist.js",
         "start_default_js": "node ./dist/main.js data-to-anonymize.json anon-data.json blacklist.json",
         "start:dev": "nodemon"
     },
@@ -25,6 +25,7 @@
     },
     "dependencies": {
         "@types/lodash": "^4.14.165",
+        "aws-sdk": "^2.797.0",
         "faker": "^5.1.0",
         "lodash": "^4.17.20"
     }
