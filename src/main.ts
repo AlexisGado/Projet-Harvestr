@@ -3,6 +3,7 @@ import { Message, Replacement, MessageComponents } from "./data/data-type";
 import { join } from "path";
 import { cloneDeep } from "lodash";
 
+
 //Open files .csv containing our data (Name, emails Organization Name,  )
 
 const rawData = readFileSync(join(__dirname, "data", process.argv[2])); //hardcode, data-to-anonymize
