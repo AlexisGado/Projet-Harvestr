@@ -1,13 +1,5 @@
-//console.log(process.argv[2]); argument suivant npx ts-node main.ts
-// chemin d'accès pour arreter le hardcode
-//const pathDataType: string = join(__dirname, "data", process.argv[2]);
 import { writeFileSync, readFileSync } from "fs";
-import { Message, Replacement, MessageComponents } from "./data/data-type"; //hardcode
-import {
-  blacklistPersonNames,
-  blacklistPersonEmails,
-  blacklistOrganizationNames,
-} from "./data/blacklist";
+import { Message, Replacement, MessageComponents } from "./data/data-type";
 import { join } from "path";
 import { cloneDeep } from "lodash";
 
@@ -18,6 +10,9 @@ const dataToAnonymize: Message[] = JSON.parse(rawData.toString());
 
 const anonData = readFileSync(join(__dirname, "data", process.argv[3])); //hardcode, anonymized-data
 const AnononymAttribute = JSON.parse(anonData.toString());
+
+const rawBlacklists = readFileSync(join(__dirname, "data", process.argv[4])); //hardcode, anonymized-data
+const blacklists = JSON.parse(rawBlacklists.toString());
 
 const AnonymizedPersonNames: string[] = [];
 const AnonymizedPersonEmails: string[] = [];
@@ -33,15 +28,15 @@ for (const objet of AnononymAttribute) {
 //Give the word we want to replace and the word we want to put instead
 const replacement: Replacement = {
   name: {
-    blacklist: blacklistPersonNames,
+    blacklist: blacklists["blacklistPersonNames"],
     anonym: AnonymizedPersonNames,
   },
   email: {
-    blacklist: blacklistPersonEmails,
+    blacklist: blacklists["blacklistPersonEmails"],
     anonym: AnonymizedPersonEmails,
   },
   organization: {
-    blacklist: blacklistOrganizationNames,
+    blacklist: blacklists["blacklistOrganizationNames"],
     anonym: AnonymizedOrganizationNames,
   },
 };

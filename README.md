@@ -1,4 +1,7 @@
 # Projet-Harvestr
-Compiler le main.ts (commande npx ts-node main.ts data-to-anonymize.ts anon-data.ts) qui affiche "dataAnonymized", la liste des messages anonymisés
+
+Utilisation typescript : utiliser les scripts initialize_json puis start_default
+
+Utilisation javascript : utiliser les scripts build puis initialize_json_js puis start_default_js
 
 
