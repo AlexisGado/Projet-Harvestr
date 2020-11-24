@@ -1,3 +1,9 @@
+import {
+    BatchDetectSentimentItemResult,
+    ListOfDetectSentimentResult
+} from "aws-sdk/clients/comprehend";
+import { SentimentLabel, SentimentScore } from "aws-sdk/clients/lexruntime";
+
 export interface Organization {
     id: string;
     name: string;
@@ -22,6 +28,7 @@ export interface Message {
     submitter: Person;
     clientId?: string;
     title?: string;
+    sentiment?: BatchDetectSentimentItemResult;
     content?: string; // WARNING: this is html data
     sub_messages?: SubMessage[];
 }

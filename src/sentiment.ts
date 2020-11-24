@@ -1,8 +1,10 @@
 import AWS from "aws-sdk";
+
 import { writeFileSync, readFileSync } from "fs";
 import { Message } from "./data/data-type";
 import { join } from "path";
 import { cloneDeep } from "lodash";
+import { log } from "console";
 
 AWS.config.update({
     apiVersion: "2017-11-27",
@@ -17,28 +19,40 @@ const rawData = readFileSync(join(__dirname, "data-anonymized.json"));
 const rawMessages: Message[] = JSON.parse(rawData.toString());
 
 const completeData = cloneDeep(rawMessages);
-const params = {
-    LanguageCode: "fr" /* required */,
-    TextList: [] /* required */
+
+type SentimentRequestType = {
+    LanguageCode: string /* required */;
+    TextList: Array<string> /* required */;
 };
-for (const message of rawMessages) {
-    params["TextList"].push(message.content);
-}
-comprehend.batchDetectSentiment(params, (err, data) => {
-    if (err) console.log(err, err.stack);
-    // an error occurred
-    else {
-        for (let i = 0; i < rawMessages.length; i++) {
-            completeData[i]["sentiment"] = {
-                sentiment: data["ResultList"][i]["Sentiment"],
-                sentimentScore: data["ResultList"][i]["SentimentScore"]
-            };
-        }
-        console.log(completeData);
-        const dataWithSentiment = JSON.stringify(completeData);
-        writeFileSync(
-            join(__dirname, "data-with-sentiment.json"),
-            dataWithSentiment
-        );
-    }
-});
+
+// const params: SentimentRequestType = {
+//     LanguageCode: "fr" /* required */,
+//     TextList: rawMessages.map(m => m.content)
+// };
+
+const detectSentiment = async (
+    params: SentimentRequestType
+): Promise<Message[]> => {
+    return new Promise((resolve, reject) => {
+        comprehend.batchDetectSentiment(params, (err, data) => {
+            if (err) {
+                reject(err);
+            } else {
+                for (let i = 0; i < rawMessages.length; i++) {
+                    completeData[i]["sentiment"] = data["ResultList"][i];
+                }
+
+                resolve(completeData);
+            }
+        });
+    });
+};
+
+(async () => {
+    const sentimentMessages = await detectSentiment({
+        LanguageCode: "fr",
+        TextList: rawMessages.map(m => m.content)
+    });
+
+    console.log(sentimentMessages);
+})();
