@@ -48,11 +48,18 @@ const detectSentiment = async (
     });
 };
 
-(async () => {
+const main = async () => {
     const sentimentMessages = await detectSentiment({
         LanguageCode: "fr",
         TextList: rawMessages.map(m => m.content)
     });
 
     console.log(sentimentMessages);
-})();
+
+    writeFileSync(
+        join(__dirname, "data-with-sentiment.json"),
+        JSON.stringify(sentimentMessages)
+    );
+};
+
+main();
