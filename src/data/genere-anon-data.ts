@@ -12,7 +12,7 @@ function genere_mail(name: string) {
 
 const data = [];
 //Number of false identity
-const data_size = 10;
+const data_size = 1000;
 
 //fill the csv file with anonyme attributes
 for (var i = 0; i < data_size; i++) {
