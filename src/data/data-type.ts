@@ -35,13 +35,7 @@ export interface Message {
 
 export type MessageComponents = Message | Person | SubMessage | Organization;
 
-export interface ReplacementSlot {
-    blacklist: string[];
-    anonym: string[];
-}
-
-export interface Replacement {
-    name: ReplacementSlot;
-    email: ReplacementSlot;
-    organization: ReplacementSlot;
+export interface Matching {
+    blacklist: string;
+    anonym: string;
 }
