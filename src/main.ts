@@ -47,10 +47,12 @@ const go_through_blacklist = (message: Message) => {
 };
 //The list of anonymized message
 const dataAnonymized: Message[] = [];
-
+var count = 0;
 for (const message of dataToAnonymize) {
     let message_anonymized: Message = cloneDeep(message);
     message_anonymized = go_through_blacklist(message_anonymized);
+    count++;
+    console.log("Message anonymized  : ", count);
     dataAnonymized.push(message_anonymized);
 }
 

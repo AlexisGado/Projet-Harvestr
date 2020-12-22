@@ -1,2 +1,5 @@
 node_modules/
 dist/
+src/data/blacklist.json
+src/data/matching.json
+src/data/data-to-anonymize.json

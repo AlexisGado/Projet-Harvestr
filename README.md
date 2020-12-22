@@ -1,26 +1,25 @@
 # Projet-Harvestr
 
-(((
-Utilisation typescript : utiliser les scripts initialize_json puis start_default
-Utilisation javascript : utiliser les scripts build puis initialize_json_js puis start_default_js
-)))
+On ne build plus le projet (on n'utilise plus que ts-node), il y aura peut-être besoin de clone
 
+1. Créer la liste des 1to1-matching : npx ts-node ./src/data/matching.js blacklist.json
 
-
-1) Build : "rimraf ./dist && tsc" (script build)
-
-2) Generer la liste de pseudos : node ./dist/data/genere-anon-data.js
-
-3) Lancer le script : node ./dist/main.js data-to-anonymize.json anon-data.json blacklist.json
-où :
-- anon-data.json a deja été créé à l'étape 2)
-- data-to-anonymize.json contient les messages à anonymiser sous la forme d'une liste de Messages (cf data-type.ts pour voir les champs)
-- blacklist.json contient un objet de la forme
-{
+-   blacklist.json est placé dans src/data et contient un objet de la forme
+    {
     blacklistPersonNames: string[],
     blacklistOrganizationNames: string[],
     blacklistPersonEmails: string[]
-}
-Ces 3 fichiers json sont doivent être dans dans dist/data/
+    }
 
-4) Le resultat se trouve sous la meme forme que data-to-anonymize.json dans le dossier dist
+2. Lancer le script d'anonymisation : npx ts-node ./src/main.js data-to-anonymize.json matching.json
+   où :
+
+-   data-to-anonymize.json et placé dans src/data contient les messages à anonymiser sous la forme d'une liste de Messages (cf data-type.ts pour voir les champs)
+
+-   matching.json a été crée à l'étape 2 dans src/data et contient un array avec des élements de type
+    {
+    blacklist: string,
+    anonym: string
+    }
+
+Ce script donne pour résultat data-anonymized.json dans le dossier src, la liste de messages anonymisés de data-to-anonymized.json

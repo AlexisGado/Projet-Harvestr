@@ -16,6 +16,7 @@ function genere_mail(name: string) {
 
 const min_size = { PersonName: 3, OrganizationName: 2, PersonEmail: 5 };
 const matching: Matching[] = [];
+
 for (const blacklist_name of blacklist["blacklistPersonNames"]) {
     if (blacklist_name != null && blacklist_name.length > min_size.PersonName) {
         matching.push({
